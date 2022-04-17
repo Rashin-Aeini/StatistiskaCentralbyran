@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31702.278
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StatistiskaCentralbyran", "StatistiskaCentralbyran\StatistiskaCentralbyran.csproj", "{C9318E11-2758-4697-8BA0-68ED2058BF28}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{C9318E11-2758-4697-8BA0-68ED2058BF28}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C9318E11-2758-4697-8BA0-68ED2058BF28}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C9318E11-2758-4697-8BA0-68ED2058BF28}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C9318E11-2758-4697-8BA0-68ED2058BF28}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {1C14871C-9278-4D9D-A4F7-025397069372}
+	EndGlobalSection
+EndGlobal
