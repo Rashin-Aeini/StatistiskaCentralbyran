@@ -39,6 +39,8 @@ namespace StatistiskaCentralbyran
             );
 
             services.AddScoped<IPopulationService, PopulationService>();
+            services.AddScoped<IYearService, YearService>();
+            services.AddScoped<IRegionService, RegionService>();
 
             services.AddControllers();
 
