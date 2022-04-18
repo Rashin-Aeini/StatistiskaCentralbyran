@@ -1,13 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using StatistiskaCentralbyran.Models.ViewModels.Pagination;
 
 namespace StatistiskaCentralbyran.Models.ViewModels.Population
 {
-    public class PopulationResponse
+    public class PopulationResponse : PaginateResponse<PopulationViewModel>
     {
-        public int TotalRecordes { get; set; }
-        public int TotalPages { get; set; }
-        public int PageIndex { get; set; }
-        public int PageSize { get; set; }
-        public List<PopulationViewModel> Recordes { get; set; }
     }
 }
