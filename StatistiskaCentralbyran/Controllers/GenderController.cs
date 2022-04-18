@@ -9,6 +9,7 @@ namespace StatistiskaCentralbyran.Controllers
     [ApiController]
     public class GenderController : ControllerBase
     {
+        [HttpGet]
         public IActionResult Index()
         {
             return Ok(Enum.GetNames(typeof(Gender)).ToList());
