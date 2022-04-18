@@ -148,6 +148,7 @@ namespace StatistiskaCentralbyran.Models.Services
                 {
                     Region = item.Region.Name,
                     Year = item.Year.Number.ToString(),
+                    Gender = value.ToString(),
                     Count = item.Count,
                 })
                 .ToList();
