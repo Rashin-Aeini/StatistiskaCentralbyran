@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 namespace StatistiskaCentralbyran.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("api/[controller]")]
     public class PopulationController : ControllerBase
     {
         private IPopulationService PopulationService { get; }
