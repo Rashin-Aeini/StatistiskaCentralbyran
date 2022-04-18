@@ -8,6 +8,7 @@ using Microsoft.OpenApi.Models;
 using StatistiskaCentralbyran.Models.Data;
 using StatistiskaCentralbyran.Models.Interfaces;
 using StatistiskaCentralbyran.Models.Repositories;
+using StatistiskaCentralbyran.Models.Services;
 using StatistiskaCentralbyran.Models.Settings;
 using StatistiskaCentralbyran.Models.Workers;
 
@@ -36,6 +37,8 @@ namespace StatistiskaCentralbyran
                 .GetSection(nameof(Centralbyran))
                 .Get<Centralbyran>()
             );
+
+            services.AddScoped<IPopulationService, PopulationService>();
 
             services.AddControllers();
 
