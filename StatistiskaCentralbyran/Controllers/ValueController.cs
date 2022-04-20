@@ -17,12 +17,12 @@ namespace StatistiskaCentralbyran.Controllers
 
         public ValueController(IYearService yearService, IRegionService regionService)
         {
-            YearService =yearService;
+            YearService = yearService;
             RegionService = regionService;
         }
 
         [HttpGet("[action]")]
-        public async Task<IActionResult> Year(PaginateRequest request)
+        public async Task<IActionResult> Year([FromQuery] PaginateRequest request)
         {
             try
             {
@@ -35,7 +35,7 @@ namespace StatistiskaCentralbyran.Controllers
         }
 
         [HttpGet("[action]")]
-        public async Task<IActionResult> Region(PaginateRequest request)
+        public async Task<IActionResult> Region([FromQuery] PaginateRequest request)
         {
             try
             {
@@ -48,7 +48,7 @@ namespace StatistiskaCentralbyran.Controllers
         }
 
         [HttpGet("[action]")]
-        public IActionResult Gender(PaginateRequest request)
+        public IActionResult Gender()
         {
             return Ok(Enum.GetNames(typeof(Gender)).ToList());
         }
