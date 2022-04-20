@@ -70,8 +70,8 @@ namespace StatistiskaCentralbyran.Models.Services
                 TotalRecordes = populations.Count,
                 TotalPages = (int)Math.Ceiling((decimal)populations.Count / entry.Size),
                 PageIndex = entry.Page,
-                PageSize = populations.Take(entry.Size).Skip(offest).Count(),
-                Recordes = populations.Take(entry.Size).Skip(offest).ToList(),
+                PageSize = populations.Skip(offest).Take(entry.Size).Count(),
+                Recordes = populations.Skip(offest).Take(entry.Size).ToList(),
             };
         }
 
@@ -117,8 +117,8 @@ namespace StatistiskaCentralbyran.Models.Services
                 TotalRecordes = populations.Count,
                 TotalPages = (int)Math.Ceiling((decimal)populations.Count / entry.Size),
                 PageIndex = entry.Page,
-                PageSize = populations.Take(entry.Size).Skip(offest).Count(),
-                Recordes = populations.Take(entry.Size).Skip(offest).ToList(),
+                PageSize = populations.Skip(offest).Take(entry.Size).Count(),
+                Recordes = populations.Skip(offest).Take(entry.Size).ToList(),
             };
         }
 
@@ -160,8 +160,8 @@ namespace StatistiskaCentralbyran.Models.Services
                 TotalRecordes = populations.Count,
                 TotalPages = (int)Math.Ceiling((decimal)populations.Count / entry.Size),
                 PageIndex = entry.Page,
-                PageSize = populations.Take(entry.Size).Skip(offest).Count(),
-                Recordes = populations.Take(entry.Size).Skip(offest).ToList(),
+                PageSize = populations.Skip(offest).Take(entry.Size).Count(),
+                Recordes = populations.Skip(offest).Take(entry.Size).ToList(),
             };
         }
     }

@@ -33,8 +33,8 @@ namespace StatistiskaCentralbyran.Models.Services
                 TotalRecordes = entries.Count,
                 TotalPages = (int)Math.Ceiling((decimal)entries.Count / entry.Size),
                 PageIndex = entry.Page,
-                PageSize = entries.Take(entry.Size).Skip(offest).Count(),
-                Recordes = entries.Take(entry.Size).Skip(offest).ToList(),
+                PageSize = entries.Skip(offest).Take(entry.Size).Count(),
+                Recordes = entries.Skip(offest).Take(entry.Size).ToList(),
             };
         }
     }
