@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using Microsoft.AspNetCore.Hosting;
+using Newtonsoft.Json;
 using StatistiskaCentralbyran.Models.Domains;
 using StatistiskaCentralbyran.Models.Interfaces;
 using StatistiskaCentralbyran.Models.Settings;
@@ -6,6 +7,7 @@ using StatistiskaCentralbyran.Models.ViewModels.Centralbyran;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -21,6 +23,8 @@ namespace StatistiskaCentralbyran.Models.Workers
         private Year[] Years { get; }
         private IDictionary<string, Region> Regions { get; }
 
+        private IWebHostEnvironment Environment { get; }
+
         #region DefinitionRepositories
         private IRepository<Year> YearRepository { get; }
         private IRepository<Region> RegionRepository { get; }
@@ -31,7 +35,8 @@ namespace StatistiskaCentralbyran.Models.Workers
             Centralbyran meta,
             IRepository<Year> yearRepository,
             IRepository<Region> regionRepository,
-            IRepository<Population> populationRepository
+            IRepository<Population> populationRepository,
+            IWebHostEnvironment environment
             )
         {
             Centralbyran = meta;
@@ -48,6 +53,8 @@ namespace StatistiskaCentralbyran.Models.Workers
             YearRepository = yearRepository;
             RegionRepository = regionRepository;
             PopulationRepository = populationRepository;
+
+            Environment = environment;
         }
 
         public async Task ExecuteAsync()
@@ -108,38 +115,29 @@ namespace StatistiskaCentralbyran.Models.Workers
             #endregion
 
             #region FetchingPopulation
-            int counter = 0;
 
-            foreach (Year year in Years)
+            try
             {
-                foreach (KeyValuePair<string, Region> region in Regions)
+                using (HttpClient client = new HttpClient()
                 {
-                    foreach (string gender in Enum.GetValues(typeof(Gender))
-                        .Cast<Gender>()
-                        .Select(item => ((int)item).ToString()))
-                    {
-                        try
-                        {
-                            using (HttpClient client = new HttpClient()
-                            {
-                                BaseAddress = new Uri(Centralbyran.Address)
-                            })
-                            {
-                                using (HttpResponseMessage response = await client.PostAsync(
-                                    string.Empty,
-                                    new StringContent(
-                                        JsonConvert.SerializeObject(
-                                            new CentralbyranRequest()
-                                            {
-                                                Query = new CentralbyranQuery[3]
-                                                {
+                    BaseAddress = new Uri(Centralbyran.Address)
+                })
+                {
+                    using (HttpResponseMessage response = await client.PostAsync(
+                        string.Empty,
+                        new StringContent(
+                            JsonConvert.SerializeObject(
+                                new CentralbyranRequest()
+                                {
+                                    Query = new CentralbyranQuery[3]
+                                    {
                                                 new CentralbyranQuery()
                                                 {
                                                     Code = "Tid",
                                                     Selection = new CentralbyranSelection()
                                                     {
                                                         Filter = "item",
-                                                        Values = new string[1] {year.Number.ToString()}
+                                                        Values = Years.Select(item => item.Number.ToString()).ToArray()
                                                     }
                                                 },
                                                 new CentralbyranQuery()
@@ -148,7 +146,7 @@ namespace StatistiskaCentralbyran.Models.Workers
                                                     Selection = new CentralbyranSelection()
                                                     {
                                                         Filter = "item",
-                                                        Values = new string[1] {region.Key}
+                                                        Values = Regions.Keys.ToArray()
                                                     }
                                                 },
                                                 new CentralbyranQuery()
@@ -157,53 +155,91 @@ namespace StatistiskaCentralbyran.Models.Workers
                                                     Selection = new CentralbyranSelection()
                                                     {
                                                         Filter = "item",
-                                                        Values = new string[1] {gender}
+                                                        Values = Enum.GetValues(typeof(Gender)).Cast<Gender>().Select(item => ((int)item).ToString()).ToArray()
                                                     }
                                                 }
-                                                },
-                                                Response = new CentralbyranResponse() { Format = "json" }
-                                            }
-                                            ),
-                                        Encoding.UTF8,
-                                        "application/json"
-                                        )
-                                    ))
+                                    },
+                                    Response = new CentralbyranResponse() { Format = "json" }
+                                }
+                                ),
+                            Encoding.UTF8,
+                            "application/json"
+                            )
+                        ))
+                    {
+
+
+                        if (response.StatusCode == HttpStatusCode.OK)
+                        {
+                            Debug.WriteLine(await response.Content.ReadAsStringAsync());
+
+                            CentralbyranReceive receive = JsonConvert
+                                .DeserializeObject<CentralbyranReceive>(
+                                await response.Content.ReadAsStringAsync()
+                                );
+
+                            List<string> sequence = new List<string>();
+
+                            foreach (CentralbyranColumn column in receive.Columns)
+                            {
+                                switch (column.Code)
                                 {
-                                    counter++;
-                                    if (response.StatusCode == HttpStatusCode.OK)
-                                    {
-                                        Debug.WriteLine(await response.Content.ReadAsStringAsync());
-
-                                        CentralbyranReceive receive = JsonConvert
-                                            .DeserializeObject<CentralbyranReceive>(
-                                            await response.Content.ReadAsStringAsync()
-                                            );
-
-                                        Population entry = new Population()
-                                        {
-                                            YearId = year.Id,
-                                            RegionId = region.Value.Id,
-                                            Gender = (Gender)int.Parse(gender),
-                                            Count = int.Parse(receive.Data[0].Values[0])
-                                        };
-
-                                        await PopulationRepository.AddAsync(entry);
-
-                                    }
+                                    case "Region":
+                                        sequence.Add(nameof(Region));
+                                        break;
+                                    case "Tid":
+                                        sequence.Add(nameof(Year));
+                                        break;
+                                    case "Kon":
+                                        sequence.Add(nameof(Gender));
+                                        break;
+                                    default:
+                                        break;
                                 }
                             }
-                        }
-                        catch (Exception exception)
-                        {
-                            Debug.WriteLine(exception.Message);
+
+                            foreach (CentralbyranData data in receive.Data)
+                            {
+                                (Year year, Region region, Gender gender) = (null, null, 0);
+                                int index = 0;
+                                foreach (string item in sequence)
+                                {
+                                    switch (item)
+                                    {
+                                        case nameof(Region):
+                                            region = Regions[data.Key[index]];
+                                            break;
+                                        case nameof(Year):
+                                            year = Years.FirstOrDefault(y => y.Number == int.Parse(data.Key[index]));
+                                            break;
+                                        case nameof(Gender):
+                                            gender = (Gender)int.Parse(data.Key[index]);
+                                            break;
+                                        default:
+                                            break;
+                                    }
+                                    index++;
+                                }
+
+                                Population entry = new Population()
+                                {
+                                    YearId = year.Id,
+                                    RegionId = region.Id,
+                                    Gender = gender,
+                                    Count = int.Parse(data.Values[0])
+                                };
+
+                                await PopulationRepository.AddAsync(entry);
+                            }
                         }
                     }
                 }
-            }
 
-            Debug.WriteLine("====================================================");
-            Debug.WriteLine(counter);
-            Debug.WriteLine("====================================================");
+            }
+            catch (Exception exception)
+            {
+                Debug.WriteLine(exception.Message);
+            }
             #endregion
         }
     }
